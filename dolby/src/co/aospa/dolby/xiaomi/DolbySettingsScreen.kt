@@ -30,6 +30,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -47,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -310,7 +312,23 @@ private fun ProfileCard(profile: Int, onSelected: (Int) -> Unit) {
             ) {
                 entries.forEachIndexed { i, entry ->
                     val value = values.getOrNull(i)?.toIntOrNull() ?: return@forEachIndexed
-                    FilterChip(selected = value == profile, onClick = { onSelected(value) }, label = { Text(entry) })
+                    val iconRes = when (value) {
+                        0 -> R.drawable.ic_dolby_profile_dynamic
+                        1 -> R.drawable.ic_dolby_profile_video
+                        2 -> R.drawable.ic_dolby_profile_music
+                        8 -> R.drawable.ic_dolby_profile_voice
+                        4 -> R.drawable.ic_dolby_profile_spatial
+                        3 -> R.drawable.ic_dolby_profile_custom
+                        else -> R.drawable.ic_dolby_profile_dynamic
+                    }
+                    FilterChip(
+                        selected = value == profile,
+                        onClick = { onSelected(value) },
+                        label = { Text(entry) },
+                        leadingIcon = {
+                            Icon(painter = painterResource(iconRes), contentDescription = null)
+                        },
+                    )
                 }
             }
         }
