@@ -6,64 +6,36 @@
 
 package co.aospa.dolby.xiaomi
 
-import android.app.AlertDialog
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Toast
-import co.aospa.dolby.xiaomi.preference.DolbySettingsFragment
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.rememberNavController
+import com.android.settingslib.spa.framework.compose.localNavController
+import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
 
-class DolbySettingsActivity : CollapsingToolbarBaseActivity() {
-
-    private lateinit var dolbyController: DolbyController
+class DolbySettingsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportFragmentManager
-            .beginTransaction()
-            .replace(
-                com.android.settingslib.collapsingtoolbar.R.id.content_frame,
-                DolbySettingsFragment(),
-                TAG
-            )
-            .commit()
-        dolbyController = DolbyController.getInstance(this)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu
-            .add(Menu.NONE, MENU_RESET, Menu.NONE, R.string.dolby_reset_all)
-            .setIcon(R.drawable.reset_wrench_24px)
-            .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            MENU_RESET -> {
-                confirmReset()
-                true
+        val controller = DolbyController.getInstance(applicationContext)
+        setContent {
+            SettingsTheme {
+                val navController = rememberNavController()
+                CompositionLocalProvider(navController.localNavController()) {
+                    SettingsScaffold(title = stringResource(R.string.dolby_title)) { paddingValues ->
+                        DolbySettingsScreen(
+                            context = this@DolbySettingsActivity,
+                            controller = controller,
+                            modifier = Modifier.padding(paddingValues),
+                        )
+                    }
+                }
             }
-            else -> super.onOptionsItemSelected(item)
         }
-
-    private fun confirmReset() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.dolby_reset_all)
-            .setMessage(R.string.dolby_reset_all_message)
-            .setPositiveButton(android.R.string.yes) { _, _ ->
-                dolbyController.resetAllProfiles()
-                recreate()
-                Toast.makeText(this, getString(R.string.dolby_reset_all_toast), Toast.LENGTH_SHORT)
-                    .show()
-            }
-            .setNegativeButton(android.R.string.no, null)
-            .show()
-    }
-
-    companion object {
-        private const val TAG = "DolbySettingsActivity"
-        private const val MENU_RESET = 1001
     }
 }
